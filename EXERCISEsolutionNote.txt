@@ -1,17 +1,21 @@
 1️⃣ Will the calculator accept a line that contains only a comment?
 Issue:
-Currently, your scanner (fb.l) does not have a rule for comments. If a comment is encountered, the scanner treats it as an unknown character (. {
+Currently, your scanner (fb.l) does not have a rule for comments. 
+If a comment is encountered, the scanner treats it as an unknown character (. {
     printf("Unexpected character: %c\n", *yytext); }), which leads to an error.
 
 Solution:
-Fixing this is easier in the scanner (fb.l). Add a rule to recognize and ignore comments. Assuming comments start with #, add:
+Fixing this is easier in the scanner (fb.l). Add a rule to recognize and ignore comments.
+ Assuming comments start with #, add:
 
 "#".*
 { /* Ignore comments */
 }
 Now, lines that contain only comments will be ignored.
 
-         2️⃣ Make the calculator support both hex and decimal numbers
+
+
+2️⃣ Make the calculator support both hex and decimal numbers
              Solution : Modify fb.l to recognize hex numbers(0x [a - fA - F0 - 9] +) and
          convert them using strtol().
 
@@ -38,6 +42,9 @@ Example Run:
 Enter expressions:
 0xA + 5
 = 15 (0xF)
+
+
+
 3️⃣ Add bitwise operators (AND, OR)
 Issue:
 | is already used for absolute value.
@@ -69,6 +76,8 @@ Enter expressions:
 = 1
 5 ^ 3
 = 6
+
+
 4️⃣ Does the handwritten scanner match the Flex version?
 Difference:
 A handwritten scanner (using getc() in C) may:
@@ -79,11 +88,15 @@ Not have automatic token buffering like Flex
 Conclusion:
 No, the handwritten version likely doesn’t match the Flex version exactly, unless written carefully.
 
+
+
 5️⃣ When would Flex NOT be a good tool for scanning?
 Cases where Flex is not ideal:
 Context-sensitive languages (e.g., indentation-based languages like Python)
 Multiple lexical states (e.g., nested comments in some languages)
 Highly dynamic token definitions (e.g., template-based languages like Jinja, JSX)
+
+
 6️⃣ Rewrite word count (wc)
 in C and compare with Flex
     Steps : Write a C
