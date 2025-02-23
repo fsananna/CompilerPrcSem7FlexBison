@@ -1,0 +1,133 @@
+1️⃣ Will the calculator accept a line that contains only a comment?
+Issue:
+Currently, your scanner (fb.l) does not have a rule for comments. If a comment is encountered, the scanner treats it as an unknown character (. {
+    printf("Unexpected character: %c\n", *yytext); }), which leads to an error.
+
+Solution:
+Fixing this is easier in the scanner (fb.l). Add a rule to recognize and ignore comments. Assuming comments start with #, add:
+
+"#".*
+{ /* Ignore comments */
+}
+Now, lines that contain only comments will be ignored.
+
+         2️⃣ Make the calculator support both hex and decimal numbers
+             Solution : Modify fb.l to recognize hex numbers(0x [a - fA - F0 - 9] +) and
+         convert them using strtol().
+
+🔹 Update fb.l
+             c
+             Copy
+             Edit
+                 [0 - 9] +
+{
+    yylval = atoi(yytext);
+    return NUMBER;
+}
+0 [xX][a - fA - F0 - 9] +
+{
+    yylval = strtol(yytext, NULL, 16);
+    return NUMBER;
+}
+🔹 Update fb.y(Print results in decimal &hex)
+    
+    calclist : |
+               calclist exp EOL { printf("= %d (0x%X)\n", $2, $2); }
+Example Run:
+
+Enter expressions:
+0xA + 5
+= 15 (0xF)
+3️⃣ Add bitwise operators (AND, OR)
+Issue:
+| is already used for absolute value.
+& (bitwise AND) is available.
+We could repurpose | for OR but need to resolve ambiguity.
+Solution:
+Use & for bitwise AND and ^ for bitwise OR (instead of | to avoid conflicts).
+Update fb.l:
+
+"&"      { return AND; }
+"^" { return OR; }
+Update fb.y : c
+                  Copy
+                      Edit %
+        token AND OR
+
+            exp : factor |
+    exp ADD factor
+{
+    $$ = $1 + $3;
+}
+| exp SUB factor { $$ = $1 - $3; }
+| exp AND factor { $$ = $1 & $3; }
+| exp OR factor { $$ = $1 ^ $3; }
+Example Run:
+
+Enter expressions:
+5 & 3
+= 1
+5 ^ 3
+= 6
+4️⃣ Does the handwritten scanner match the Flex version?
+Difference:
+A handwritten scanner (using getc() in C) may:
+
+Skip whitespace differently
+Handle numbers differently (e.g., manual validation)
+Not have automatic token buffering like Flex
+Conclusion:
+No, the handwritten version likely doesn’t match the Flex version exactly, unless written carefully.
+
+5️⃣ When would Flex NOT be a good tool for scanning?
+Cases where Flex is not ideal:
+Context-sensitive languages (e.g., indentation-based languages like Python)
+Multiple lexical states (e.g., nested comments in some languages)
+Highly dynamic token definitions (e.g., template-based languages like Jinja, JSX)
+6️⃣ Rewrite word count (wc)
+in C and compare with Flex
+    Steps : Write a C
+            version(wc.c)
+
+             
+#include <stdio.h>
+#include <ctype.h>
+
+            int main()
+{
+    int words = 0, inWord = 0;
+    char c;
+    while ((c = getchar()) != EOF)
+    {
+        if (isspace(c))
+        {
+            inWord = 0;
+        }
+        else if (!inWord)
+        {
+            inWord = 1;
+            words++;
+        }
+    }
+    printf("Words: %d\n", words);
+    return 0;
+}
+Compare with a Flex version(wc.l)
+
+        
+        % %
+        [^ \t\n] +
+{
+    word_count++;
+}
+% %
+    int word_count = 0;
+int main()
+{
+    yylex();
+    printf("Words: %d\n", word_count);
+    return 0;
+}
+Performance & Debugging Comparison
+Flex version is likely faster (optimized for lexical analysis)
+C version is easier to debug (step-by-step control over input handling)
