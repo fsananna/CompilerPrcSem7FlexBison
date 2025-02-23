@@ -11,6 +11,8 @@
 "*"      { return MUL; }
 "/"      { return DIV; }
 "|"      { return ABS; }
+"&"      { return AND; }
+"^"      { return OR; }
 \n       { return EOL; }
 [ \t]    { /* Ignore spaces */ }
 .        { printf("Unexpected character: %c\n", *yytext); }

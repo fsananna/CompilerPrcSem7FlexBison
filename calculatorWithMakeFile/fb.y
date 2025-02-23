@@ -8,6 +8,7 @@ void yyerror(const char *s); // Fix yyerror declaration
 %token NUMBER
 %token ADD SUB MUL DIV ABS
 %token EOL
+%token AND OR
 
 %%
 
@@ -18,6 +19,8 @@ calclist:
 exp: factor
     | exp ADD factor { $$ = $1 + $3; }
     | exp SUB factor { $$ = $1 - $3; }
+     | exp AND factor { $$ = $1 & $3; }
+    | exp OR factor { $$ = $1 ^ $3; }
     ;
 
 factor: term
